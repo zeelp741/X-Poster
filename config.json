@@ -1,0 +1,27 @@
+# Default configuration file for the news automation system
+{
+    "feeds": {
+        "politics": [
+            "http://feeds.bbci.co.uk/news/politics/rss.xml",
+            "http://feeds.bbci.co.uk/news/uk_politics/rss.xml"
+        ],
+        "finance": [
+            "http://feeds.bbci.co.uk/news/business/rss.xml",
+            "https://ir.thomsonreuters.com/rss/news-releases.xml"
+        ],
+        "stock_market": [
+            "http://feeds.bbci.co.uk/news/business/economy/rss.xml",
+            "http://feeds.bbci.co.uk/news/business/market_data/rss.xml"
+        ],
+        "world": [
+            "http://feeds.bbci.co.uk/news/world/rss.xml",
+            "http://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
+            "http://feeds.bbci.co.uk/news/world/europe/rss.xml",
+            "http://feeds.bbci.co.uk/news/world/asia/rss.xml"
+        ]
+    },
+    "max_articles_per_run": 10,
+    "max_article_age_hours": 24,
+    "post_delay_seconds": 60,
+    "state_file": "data/processed_articles.json"
+}
