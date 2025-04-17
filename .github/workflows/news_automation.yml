@@ -37,12 +37,6 @@ jobs:
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
         run: python src/main.py --max-posts 3
       
-      - name: Upload state file
-        uses: actions/upload-artifact@v2
-        with:
-          name: state-file
-          path: data/processed_articles.json
-      
       - name: Commit and push state file
         run: |
           git config --global user.name 'GitHub Actions'
