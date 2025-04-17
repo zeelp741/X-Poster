@@ -2,8 +2,15 @@ name: News Automation
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Run every hour
-  workflow_dispatch:      # Manual trigger support
+    # Run every hour at minute 0
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+
+# Prevent concurrent runs to avoid conflicts with data/processed_articles.json
+concurrency:
+  group: news-automation
+  cancel-in-progress: true
 
 jobs:
   fetch-summarize-post:
@@ -12,6 +19,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ref: main  # Replace with your default branch if different (e.g., master)
+          pull: 'false'  # Disable automatic pull to avoid rebase conflicts
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -40,8 +51,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git pull origin ${{ github.ref_name }} --rebase
+          git config --global user.email 'actions@github.com'
+          # Stash any existing changes to avoid conflicts
+          git stash || true
+          # Pull without rebase to sync with remote
+          git pull origin main --no-rebase || true
+          # Pop stash to restore changes
+          git stash pop || true
+          # Add and commit the state file
           git add data/processed_articles.json
           git commit -m "Update processed articles state [skip ci]" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref_name }}
+          # Push with authentication
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+        # Continue even if commit/push fails to allow debugging
+        continue-on-error: true
+
+      - name: Upload state file
+        uses: actions/upload-artifact@v3
+        with:
+          name: state-file
+          path: data/processed_articles.json
